@@ -16,7 +16,7 @@ Godgifu will include
 - a web server written in [Rust](https://www.rust-lang.org/) with the [Tokio runtime](https://tokio.rs/) and built using either [Actix-Web](https://actix.rs/docs/) or [Axum](https://docs.rs/axum/latest/axum/index.html#) (obviously everything in the future will be written in Rust).
 - Redis caching.
 - [Capt'n Proto](https://capnproto.org/), a binary messaging schema, will be used for Client-to-Server communication to keep data message sizes small (and to learn an alternative to JSON).
-- One database will be used, [PostgreSQL](https://www.postgresql.org/docs/) for both relational data, and JSON messaging data. A second database might be used for either prototyping, or to increase the project complexity. If so it will b [CouchDB](https://docs.couchdb.org/en/stable/).
+- One database will be used, [PostgreSQL](https://www.postgresql.org/docs/) for both relational data, and JSON messaging data. A second database might be used for either prototyping, or to increase the project complexity. If so it will be [CouchDB](https://docs.couchdb.org/en/stable/).
 - Docker for building containers with multiple avenues of stress testing.
 - Instead of JWTs token verification will use [PASETOs](https://paseto.io/).
 - HTTPS for connections.
