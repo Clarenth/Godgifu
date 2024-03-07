@@ -1,0 +1,1 @@
+## _layout should not be used directly. _layout is a folder structure meant to be copied and filled in for each new module
