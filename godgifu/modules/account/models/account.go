@@ -7,11 +7,11 @@ import (
 )
 
 type Account struct {
-	AccountEmployeeData *AccountEmployeeData `json:"-"`
-	AccountIdentityData *AccountIdentityData `json:"-"`
+	AccountEmployee *AccountEmployee `json:"-"`
+	AccountIdentity *AccountIdentity `json:"-"`
 }
 
-type AccountEmployeeData struct {
+type AccountEmployee struct {
 	ID                  uuid.UUID `db:"id" json:"id"`
 	Email               string    `db:"email" json:"username"`
 	Password            string    `db:"password" json:"-"`
@@ -26,7 +26,7 @@ type AccountEmployeeData struct {
 	UpdatedAt           time.Time `db:"updated_at" json:"updated_at"`
 }
 
-type AccountIdentityData struct {
+type AccountIdentity struct {
 	ID          uuid.UUID `db:"id" json:"id"`
 	FirstName   string    `db:"first_name" json:"first_name"`
 	MiddleName  string    `db:"middle_name" json:"middle_name"`

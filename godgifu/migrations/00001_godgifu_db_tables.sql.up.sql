@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS accounts_identity
 (
   id uuid NOT NULL DEFAULT uuid_generate_v4() PRIMARY KEY,
   first_name text NOT NULL,
-  middle_name text NOT NULL,
+  middle_name text,
   last_name text NOT NULL,
   age bigint,
   sex varchar(20),

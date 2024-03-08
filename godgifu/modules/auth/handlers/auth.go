@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"godgifu/modules/account/models"
 	account "godgifu/modules/account/models"
 	"godgifu/modules/auth/services"
 
@@ -32,21 +33,28 @@ func (handler *authHandler) Signup(ctx echo.Context) error {
 	var request signupSchema
 	if ok := BindJSON(ctx, &request); !ok {
 		log.Printf("Error in func Signup, BindJSON, request: \n %v", &request)
-		return ctx.String(http.StatusBadRequest, "Failed to create user account.")
+		// return ctx.String(http.StatusBadRequest, "Failed to create user account.")
+		log.Print("Hello from BindJSON")
+		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
 	if request.Email == "" || request.Password == "" {
+		log.Print("Hello from blank Email or Password")
 		return ctx.String(http.StatusBadRequest, "Email and Password cannot be empty")
 	}
 
-	account := &account.AccountEmployeeData{
-		Email:    request.Email,
-		Password: request.Password,
+	account := &models.Account{
+		AccountEmployee: &account.AccountEmployee{
+			Email:    request.Email,
+			Password: request.Password,
+		},
+		AccountIdentity: &account.AccountIdentity{},
 	}
 
 	err := handler.AuthService.CreateAccount(ctx, *account)
 	if err != nil {
-		return ctx.String(http.StatusInternalServerError, "Failed to create user account.")
+		echo.NewHTTPError(http.StatusInternalServerError, "Failed to create user account.")
+		return err
 	}
 
 	return ctx.String(http.StatusOK, "Success")

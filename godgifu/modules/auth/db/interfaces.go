@@ -7,5 +7,5 @@ import (
 )
 
 type PostgresDB interface {
-	CreateAccount(ctx echo.Context, accountData *models.AccountEmployeeData) error
+	CreateAccount(ctx echo.Context, accountData *models.Account) error
 }
