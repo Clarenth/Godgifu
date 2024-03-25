@@ -7,5 +7,6 @@ import (
 )
 
 type AuthService interface {
-	CreateAccount(ctx echo.Context, accountData account.Account) (err error)
+	CreateAccount(ctx echo.Context, accountData *account.Account) error
+	Signin(ctx echo.Context, accountData *account.AccountEmployee) (match bool, err error)
 }

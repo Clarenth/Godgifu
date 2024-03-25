@@ -8,4 +8,5 @@ import (
 
 type PostgresDB interface {
 	CreateAccount(ctx echo.Context, accountData *models.Account) error
+	FindAccountByEmail(ctx echo.Context, email string) (account *models.AccountEmployee, err error)
 }

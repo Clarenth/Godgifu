@@ -10,6 +10,7 @@ func InitRoutes(server *echo.Echo, handlers handlers.AuthHandlers) {
 	// Setup routes
 	authRoutes := server.Group("/auth")
 	{
+		authRoutes.POST("/signin", handlers.Signin)
 		authRoutes.POST("/signup", handlers.Signup)
 	}
 }

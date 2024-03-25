@@ -11,21 +11,20 @@ import (
 )
 
 type postgres struct {
-	db *sqlx.DB
+	DB *sqlx.DB
 }
 
 func NewPostgresDB(db *sqlx.DB) PostgresDB {
 	return &postgres{
-		db: db,
+		DB: db,
 	}
 }
 
-func (pgDB *postgres) CreateAccount(ctx echo.Context, accountData *models.Account) error {
+func (pg *postgres) CreateAccount(ctx echo.Context, accountData *models.Account) error {
 	query := `INSERT INTO accounts_employee (id, email, password, created_at, updated_at) 
 						VALUES ($1, $2, $3, $4, $5) RETURNING *;
 						`
-	log.Print("Reached db.Exec")
-	if _, err := pgDB.db.Exec(query, accountData.AccountEmployee.ID, accountData.AccountEmployee.Email, accountData.AccountEmployee.Password, accountData.AccountEmployee.CreatedAt, accountData.AccountEmployee.UpdatedAt); err != nil {
+	if _, err := pg.DB.Exec(query, accountData.AccountEmployee.ID, accountData.AccountEmployee.Email, accountData.AccountEmployee.Password, accountData.AccountEmployee.CreatedAt, accountData.AccountEmployee.UpdatedAt); err != nil {
 		log.Printf("error in Postgres accounts_employee, err: %v", err)
 		if err, ok := err.(*pgconn.PgError); ok && err.Code == "unique_violation" {
 			log.Printf("error1: Could not create an account with email: %v, or phone number: %v. Reason: %v\n", accountData.AccountEmployee.Email, accountData.AccountEmployee.PhoneNumber, err.Code)
@@ -37,10 +36,21 @@ func (pgDB *postgres) CreateAccount(ctx echo.Context, accountData *models.Accoun
 	query = `INSERT INTO accounts_identity (first_name, last_name, created_at, updated_at)
 						VALUES ($1, $2, $3, $4) RETURNING *;
 						`
-	if result, err := pgDB.db.Exec(query, accountData.AccountIdentity.FirstName, accountData.AccountIdentity.LastName, accountData.AccountEmployee.CreatedAt, accountData.AccountEmployee.UpdatedAt); err != nil {
+	if result, err := pg.DB.Exec(query, accountData.AccountIdentity.FirstName, accountData.AccountIdentity.LastName, accountData.AccountEmployee.CreatedAt, accountData.AccountEmployee.UpdatedAt); err != nil {
 		log.Printf("error in Postgres accounts_identity, err: %v", err)
 		log.Printf("Inserted %v", result)
 		return err
 	}
 	return nil
+}
+
+// FindAccountByEmail searches the DB for the account that matches the email parameter and returns the account.
+func (pg *postgres) FindAccountByEmail(ctx echo.Context, email string) (*models.AccountEmployee, error) {
+	accountData := &models.AccountEmployee{}
+	query := "SELECT id, email, password FROM accounts_employee WHERE email = $1"
+	if err := pg.DB.Get(accountData, query, email); err != nil {
+		log.Printf("Failed to get account with email: %v. Error:%v\n", email, err)
+		return nil, err
+	}
+	return accountData, nil
 }

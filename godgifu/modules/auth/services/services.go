@@ -13,7 +13,7 @@ import (
 )
 
 type authServices struct {
-	postgres postgres.PostgresDB
+	Postgres postgres.PostgresDB
 }
 
 /*
@@ -23,7 +23,7 @@ type authServices struct {
 
 func NewAuthServices(postgres postgres.PostgresDB) AuthService {
 	return &authServices{
-		postgres: postgres,
+		Postgres: postgres,
 	}
 }
 
@@ -35,7 +35,7 @@ var argon2Params = &argon2id.Params{
 	KeyLength:   64,
 }
 
-func (services *authServices) CreateAccount(ctx echo.Context, account account.Account) (err error) {
+func (services *authServices) CreateAccount(ctx echo.Context, account *account.Account) (err error) {
 	// implement argon2 hashing and salting here
 	// to protect passwords from plain text exposing
 	hashedPassword, err := argon2id.CreateHash(account.AccountEmployee.Password, argon2Params)
@@ -52,7 +52,7 @@ func (services *authServices) CreateAccount(ctx echo.Context, account account.Ac
 	account.AccountIdentity.CreatedAt = account.AccountEmployee.CreatedAt
 	account.AccountIdentity.CreatedAt = account.AccountEmployee.UpdatedAt
 
-	err = services.postgres.CreateAccount(ctx, &account)
+	err = services.Postgres.CreateAccount(ctx, account)
 	if err != nil {
 		return err
 	}
@@ -61,4 +61,24 @@ func (services *authServices) CreateAccount(ctx echo.Context, account account.Ac
 	// 	return err
 	// }
 	return nil
+}
+
+func (services *authServices) Signin(ctx echo.Context, payload *account.AccountEmployee) (result bool, err error) {
+	account, err := services.Postgres.FindAccountByEmail(ctx, payload.Email)
+	if err != nil {
+		log.Print("Could not verify email address in services Signin")
+		return false, err
+	}
+
+	// Verify the password against the hash
+	accountMatch, err := argon2id.ComparePasswordAndHash(payload.Password, account.Password)
+	if err != nil {
+		log.Printf("Error: Could not ComparePasswordAndHash successfully")
+		return false, err
+	}
+	if !accountMatch {
+		return false, err
+	}
+
+	return accountMatch, nil
 }

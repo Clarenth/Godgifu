@@ -5,7 +5,7 @@ import (
 )
 
 type AuthHandlers interface {
-	Signin(ctx echo.Context) (err error)
-	Signout(ctx echo.Context) (err error)
-	Signup(ctx echo.Context) (err error)
+	Signin(ctx echo.Context) error
+	Signout(ctx echo.Context) error
+	Signup(ctx echo.Context) error
 }
