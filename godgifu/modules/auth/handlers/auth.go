@@ -13,11 +13,13 @@ import (
 
 type authHandler struct {
 	AuthService services.AuthService
+	JWTService  services.JWTService
 }
 
-func NewAuthHandlers(service services.AuthService) AuthHandlers {
+func NewAuthHandlers(accountServices services.AuthService, jwtServices services.JWTService) AuthHandlers {
 	return &authHandler{
-		AuthService: service,
+		AuthService: accountServices,
+		JWTService:  jwtServices,
 	}
 }
 
@@ -33,18 +35,24 @@ func (handler *authHandler) Signin(ctx echo.Context) error {
 		return ctx.String(http.StatusBadRequest, "Email and Password cannot be empty")
 	}
 
-	account := &account.AccountEmployee{
+	payload := &account.AccountEmployee{
 		Email:    request.Email,
 		Password: request.Password,
 	}
 
-	result, err := handler.AuthService.Signin(ctx, account)
+	accountData, err := handler.AuthService.Signin(ctx, payload)
 	if err != nil {
 		echo.NewHTTPError(http.StatusInternalServerError, "Signin failed.")
 		return err
 	}
 
-	log.Print(result)
+	token, err := handler.JWTService.NewTokenPairFromAccount(ctx, accountData, "")
+	log.Print(token)
+	if err != nil {
+		log.Print(err)
+		echo.NewHTTPError(http.StatusInternalServerError, "Signin failed (tokens)")
+		return err
+	}
 
 	return ctx.String(http.StatusOK, "Signin success")
 }

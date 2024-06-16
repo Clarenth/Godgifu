@@ -1,21 +1,32 @@
 package config
 
 import (
+	"crypto/rsa"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"godgifu/logger"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	//"github.com/redis/go-redis/v9"
+	"github.com/redis/go-redis/v9"
 )
+
+type JWTFields struct {
+	PrivateKey                 *rsa.PrivateKey
+	PublicKey                  *rsa.PublicKey
+	RefreshSecretKey           string
+	IDTokenExpirationSecs      int64
+	RefreshTokenExpirationSecs int64
+}
 
 // Configuration struct fields are used for configuring the server
 type DevConfiguration struct {
@@ -26,12 +37,13 @@ type DevConfiguration struct {
 	//Enviroment string
 	Postgres *sqlx.DB
 	// NoSQL
-	// Redis      *redis.Client
+	Redis *redis.Client
+	JWT   *JWTFields
 	// FilesDir   string
 	// LoggerDir  string
 }
 
-func DevLoadConfig() (*Configuration, error) {
+func DevLoadConfig() (*DevConfiguration, error) {
 
 	// ----- Dev only: remove before building Production -----
 	devENV, err := devLoadENV()
@@ -40,7 +52,47 @@ func DevLoadConfig() (*Configuration, error) {
 	}
 	// ----- Debug only: remove before building Production -----
 
-	// Postgres verify connection
+	// ----- Begin RSA Keys -----
+	log.Println("Loading RSA keys")
+
+	privateKeyFile := os.Getenv("PRIVATE_KEY_FILE")
+	privateKeyValue, err := os.ReadFile(privateKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("could not read private key file: %w", err)
+	}
+	privateKey, err := jwt.ParseRSAPrivateKeyFromPEM(privateKeyValue)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse private key: %w", err)
+	}
+
+	publicKeyFile := os.Getenv("PUBLIC_KEY_FILE")
+	publicKeyValue, err := os.ReadFile(publicKeyFile)
+	if err != nil {
+		return nil, fmt.Errorf("could not read public key file: %w", err)
+	}
+	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(publicKeyValue)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse public key: %w", err)
+	}
+	// ----- End RSA Keys -----
+
+	// ----- Begin JWT tokens
+	id_token_exp := os.Getenv("ID_TOKEN_EXP")
+	refresh_token_exp := os.Getenv("REFRESH_TOKEN_EXP")
+	refreshSecretKey := os.Getenv("REFRESH_SECRET_KEY")
+	idTokenExpiration, err := strconv.ParseInt(id_token_exp, 0, 64)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse JWT token expiration ENV to int: %w", err)
+	}
+	refreshTokenExpiration, err := strconv.ParseInt(refresh_token_exp, 0, 64)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse JWT refresh expiration ENV to int: %w", err)
+	}
+	log.Print("idToken expiration time: ", idTokenExpiration)
+	log.Print("refreshToken expiration time: ", refreshTokenExpiration)
+	// ----- End JWT tokens
+
+	// ----- Begin Postgres verify connection -----
 	log.Printf("Config: Connecting to Postgres")
 	pgConnectionString := devENV.pgConn
 	postgres, err := sqlx.Connect("pgx", pgConnectionString)
@@ -48,17 +100,16 @@ func DevLoadConfig() (*Configuration, error) {
 		return nil, fmt.Errorf("error with sqlx.Connect: %v", err)
 	}
 	postgres.SetMaxIdleConns(5)
-	if err != nil {
-		return nil, fmt.Errorf("error opening db: %w", err)
-	}
+	// ----- End Postgres verify connection
 
-	// Redis verify connection
-	// log.Printf("Connecting to redis")
-	// redisDB := redis.NewClient(&redis.Options{
-	// 	Addr:     fmt.Sprintf("%s:%s", redis_host, redis_port),
-	// 	Password: "",
-	// 	DB:       0,
-	// })
+	// ----- Begin Redis verify connection -----
+	log.Printf("Connecting to redis")
+	redisDB := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", devENV.redisHost, devENV.redisPort),
+		Password: "",
+		DB:       0,
+	})
+	// ----- End Redis verify connection -----
 
 	router := echo.New()
 	router.Use(middleware.RecoverWithConfig(
@@ -78,11 +129,19 @@ func DevLoadConfig() (*Configuration, error) {
 		validator: validator.New(),
 	}
 
-	config := &Configuration{
-		Router:          router,
-		BaseURL:         devENV.baseURL,
+	config := &DevConfiguration{
+		Router:  router,
+		BaseURL: devENV.baseURL,
+		JWT: &JWTFields{
+			PrivateKey:                 privateKey,
+			PublicKey:                  publicKey,
+			RefreshSecretKey:           refreshSecretKey,
+			IDTokenExpirationSecs:      idTokenExpiration,
+			RefreshTokenExpirationSecs: refreshTokenExpiration,
+		},
 		Port:            devENV.port,
 		Postgres:        postgres,
+		Redis:           redisDB,
 		TimeoutDuration: 5 * time.Second,
 	}
 
@@ -137,15 +196,15 @@ func devLoadENV() (*dev_env, error) {
 }
 
 // Use in the server graceful shutdown to close all remote Data Storage connections (Postgres, Redis, Cloud, etc.)
-func (config *Configuration) CloseDataStorageConnections() error {
+func (config *DevConfiguration) CloseDataStorageConnections() error {
 	if err := config.Postgres.Close(); err != nil {
 		return fmt.Errorf("error, closing Postgres database: %w", err)
 	}
 
 	//Redis
-	// if err := config.Redis.Close(); err != nil {
-	// 	return fmt.Errorf("error, closing Redis database:%w", err)
-	// }
+	if err := config.Redis.Close(); err != nil {
+		return fmt.Errorf("error, closing Redis database:%w", err)
+	}
 
 	//Cloud Storage(?)
 

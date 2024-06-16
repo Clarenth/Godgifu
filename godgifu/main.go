@@ -22,8 +22,12 @@ func main() {
 		log.Printf("LoadConfig failed, error: %v", err)
 	}
 
+	auth.InitAuth(router.Router, router.Postgres, router.Redis, router.JWT.PrivateKey, router.JWT.PublicKey, router.JWT.RefreshSecretKey, router.JWT.RefreshTokenExpirationSecs, router.JWT.IDTokenExpirationSecs)
 	account.InitAccount(router.Router, router.Postgres)
-	auth.InitAuth(router.Router, router.Postgres)
+
+	log.Println("Server port:", router.Port)
+	log.Println("Postgres connection:", router.Postgres)
+	log.Println("Redis connection:", router.Redis)
 
 	// context listens for the server kill cmd ctrl+C
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
