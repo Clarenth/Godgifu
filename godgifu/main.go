@@ -17,17 +17,20 @@ import (
 )
 
 func main() {
-	router, err := config.DevLoadConfig()
+	server, err := config.DevLoadConfig()
 	if err != nil {
 		log.Printf("LoadConfig failed, error: %v", err)
 	}
 
-	auth.InitAuth(router.Router, router.Postgres, router.Redis, router.JWT.PrivateKey, router.JWT.PublicKey, router.JWT.RefreshSecretKey, router.JWT.RefreshTokenExpirationSecs, router.JWT.IDTokenExpirationSecs)
-	account.InitAccount(router.Router, router.Postgres)
+	server.Router.Debug = true
 
-	log.Println("Server port:", router.Port)
-	log.Println("Postgres connection:", router.Postgres)
-	log.Println("Redis connection:", router.Redis)
+	// auth.InitAuth(router.Router, router.Postgres, router.Redis, router.JWT.PrivateKey, router.JWT.PublicKey, router.JWT.RefreshSecretKey, router.JWT.RefreshTokenExpirationSecs, router.JWT.IDTokenExpirationSecs)
+	auth.InitAuth(server)
+	account.InitAccount(server.Router, server.Postgres)
+
+	log.Println("Server port:", server.Port)
+	log.Println("Postgres connection:", server.Postgres)
+	log.Println("Redis connection:", server.Redis)
 
 	// context listens for the server kill cmd ctrl+C
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
@@ -41,7 +44,7 @@ func main() {
 		// if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		// 	log.Fatalf("error with ListenAndServe: %v\n", err)
 		// }
-		if err := router.Router.Start(":" + router.Port); err != http.ErrServerClosed {
+		if err := server.Router.Start(":" + server.Port); err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
 	}()
@@ -62,11 +65,11 @@ func main() {
 	defer cancel()
 
 	// close data storage connections here
-	if err := router.CloseDataStorageConnections(); err != nil {
+	if err := server.CloseDataStorageConnections(); err != nil {
 		log.Fatalf("Possible error or Graceful Shutdown initiated. Closing data storage connections %v\n", err)
 	}
 
-	if err := router.Router.Shutdown(ctx); err != nil {
+	if err := server.Router.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown due to: ", err)
 	}
 

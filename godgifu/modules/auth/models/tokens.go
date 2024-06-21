@@ -13,7 +13,7 @@ import (
 // JWTToken struct contains the JWT claims used in system authentication
 type JWTToken struct {
 	// Account ID Code of the account who owns the JWT
-	ID uuid.UUID `json:"id_code"`
+	ID uuid.UUID `json:"id"`
 	// Email belonging to the Account who owns the JWT
 	Email string `json:"email"`
 	// JobTitle      string    `json:"job_title"`

@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	"godgifu/modules/account/models"
 	account "godgifu/modules/account/models"
+	"godgifu/modules/auth/models"
 	"godgifu/modules/auth/services"
 
 	"github.com/labstack/echo/v4"
@@ -50,15 +50,19 @@ func (handler *authHandler) Signin(ctx echo.Context) error {
 	log.Print(token)
 	if err != nil {
 		log.Print(err)
-		echo.NewHTTPError(http.StatusInternalServerError, "Signin failed (tokens)")
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, "Signin failed.")
 	}
 
-	return ctx.String(http.StatusOK, "Signin success")
+	return ctx.JSON(http.StatusOK, token)
 }
 
 func (handler *authHandler) Signout(ctx echo.Context) (err error) {
-	panic("Not done yet")
+	accountID := ctx.Get("account")
+
+	if err := handler.JWTService.Signout(ctx, accountID.(*models.JWTToken).ID); err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, "There was a problem on our end.")
+	}
+	return
 }
 
 func (handler *authHandler) Signup(ctx echo.Context) error {
@@ -73,7 +77,7 @@ func (handler *authHandler) Signup(ctx echo.Context) error {
 		return ctx.String(http.StatusBadRequest, "Email and Password cannot be empty")
 	}
 
-	account := models.Account{
+	account := account.Account{
 		AccountEmployee: &account.AccountEmployee{
 			Email:    request.Email,
 			Password: request.Password,

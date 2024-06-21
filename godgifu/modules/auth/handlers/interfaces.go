@@ -10,8 +10,9 @@ type AuthHandlers interface {
 	Signup(ctx echo.Context) error
 }
 
-type PASETOHandler interface {
+type JWTHandler interface {
+	RefreshJWT(ctx echo.Context) error
 }
 
-type JWTHandler interface {
+type PASETOHandler interface {
 }

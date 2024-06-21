@@ -32,18 +32,18 @@ func (redisRepo *redisTokenRepository) SetRefreshToken(ctx context.Context, acco
 	return nil
 }
 
-func (redisRepo *redisTokenRepository) DeleteRefreshToken(ctx context.Context, accountIDCode string, tokenID string) error {
-	key := fmt.Sprintf("%s:%s", accountIDCode, tokenID)
+func (redisRepo *redisTokenRepository) DeleteRefreshToken(ctx context.Context, accountID string, tokenID string) error {
+	key := fmt.Sprintf("%s:%s", accountID, tokenID)
 	result := redisRepo.Redis.Del(ctx, key)
 
 	if err := result.Err(); err != nil {
-		log.Printf("Could not DELETE Redis refresh token to for accountIDCode:tokenID: %s:%s: %v\n", accountIDCode, tokenID, err)
+		log.Printf("Could not DELETE Redis refresh token for accountIDCode:tokenID: %s:%s: %v\n", accountID, tokenID, err)
 		return echo.ErrInternalServerError
 	}
 
 	// Val returns the count of deleted keys. If no keys are deleted then the Refresh Token is invalid.
 	if result.Val() < 1 {
-		log.Printf("Refresh Token to redis for accountIDCode:tokenID %s:%s does not exist\n", accountIDCode, tokenID)
+		log.Printf("Refresh Token to redis for accountID:tokenID %s:%s does not exist\n", accountID, tokenID)
 		return echo.ErrUnauthorized
 	}
 

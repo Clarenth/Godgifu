@@ -52,11 +52,11 @@ func NewJWTService(config *ConfigTokenService) JWTService {
 // If a previous token is included it will be removed from the tokens repository.
 func (service *jwtService) NewTokenPairFromAccount(ctx echo.Context, account *account.AccountEmployee, previousTokenID string) (*models.JWTTokenPair, error) {
 	log.Print("Hello previousTokenID: ", previousTokenID)
-	log.Print("Hello id_code ", account.ID)
+	log.Print("Hello ID ", account.ID)
 	if previousTokenID != "" {
 		ctxRequest := ctx.Request().Context()
 		if err := service.TokenRepository.DeleteRefreshToken(ctxRequest, account.ID.String(), previousTokenID); err != nil {
-			log.Printf("Could not delete previous refresh token for account id_code %v, token ID: %v\n", account.ID, previousTokenID)
+			log.Printf("Could not delete previous refresh token for account ID %v, token ID: %v\n", account.ID, previousTokenID)
 
 			return nil, err
 		}
@@ -78,7 +78,7 @@ func (service *jwtService) NewTokenPairFromAccount(ctx echo.Context, account *ac
 	// On account signup or signin, generate a new token for the session
 	ctxRequest := ctx.Request().Context()
 	if err := service.TokenRepository.SetRefreshToken(ctxRequest, account.ID.String(), refreshToken.ID.String(), refreshToken.ExpirationTime); err != nil {
-		log.Printf("Error storing tokenID for account id_code: %v. Error: %v\n", account.ID, err.Error())
+		log.Printf("Error storing tokenID for account ID: %v. Error: %v\n", account.ID, err.Error())
 		return nil, echo.ErrInternalServerError
 	}
 
@@ -125,9 +125,4 @@ func (service *jwtService) ValidateRefreshToken(tokenString string) (*models.JWT
 		AccountID:    claims.TokenID,
 		SignedString: tokenString,
 	}, nil
-}
-
-func (service *jwtService) Signout(ctx echo.Context, accountID uuid.UUID) error {
-	ctxRequest := ctx.Request().Context()
-	return service.TokenRepository.DeleteAccountRefreshTokens(ctxRequest, accountID.String())
 }
