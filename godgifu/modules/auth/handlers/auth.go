@@ -11,19 +11,19 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type authHandler struct {
+type handler struct {
 	AuthService services.AuthService
 	JWTService  services.JWTService
 }
 
 func NewAuthHandlers(accountServices services.AuthService, jwtServices services.JWTService) AuthHandlers {
-	return &authHandler{
+	return &handler{
 		AuthService: accountServices,
 		JWTService:  jwtServices,
 	}
 }
 
-func (handler *authHandler) Signin(ctx echo.Context) error {
+func (handler *handler) Signin(ctx echo.Context) error {
 	var request signinSchema
 	if ok := BindJSON(ctx, &request); !ok {
 		log.Printf("Error in Signin, BindJSON failed request: %v", &request)
@@ -56,7 +56,7 @@ func (handler *authHandler) Signin(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, token)
 }
 
-func (handler *authHandler) Signout(ctx echo.Context) (err error) {
+func (handler *handler) Signout(ctx echo.Context) (err error) {
 	accountID := ctx.Get("account")
 
 	if err := handler.JWTService.Signout(ctx, accountID.(*models.JWTToken).ID); err != nil {
@@ -65,7 +65,7 @@ func (handler *authHandler) Signout(ctx echo.Context) (err error) {
 	return
 }
 
-func (handler *authHandler) Signup(ctx echo.Context) error {
+func (handler *handler) Signup(ctx echo.Context) error {
 	var request signupSchema
 	if ok := BindJSON(ctx, &request); !ok {
 		log.Printf("Error in Signup, BindJSON failed request: %v", &request)

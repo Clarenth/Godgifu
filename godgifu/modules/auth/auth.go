@@ -9,9 +9,15 @@ import (
 )
 
 type Auth struct {
+	AuthHandlers handlers.AuthHandlers
+	AuthServices services.AuthService
+	DB           db.PostgresDB
+	JWTHandlers  handlers.JWTHandler
+	JWTServices  services.JWTService
+	Redis        db.RedisDB
 }
 
-func InitAuth(server *config.DevConfiguration) {
+func InitAuth(server *config.DevConfiguration) Auth {
 	postgresDB := db.NewPostgresDB(server.Postgres)
 	redisDB := db.NewRedisTokenRepository(server.Redis)
 	auth := services.NewAuthServices(postgresDB)
@@ -26,4 +32,13 @@ func InitAuth(server *config.DevConfiguration) {
 	authHandlers := handlers.NewAuthHandlers(auth, jwt)
 	jwtHandlers := handlers.NewJWTHandlers(auth, jwt)
 	routes.InitRoutes(server.Router, authHandlers, jwtHandlers, jwt)
+
+	return Auth{
+		AuthHandlers: authHandlers,
+		AuthServices: auth,
+		DB:           postgresDB,
+		JWTHandlers:  jwtHandlers,
+		JWTServices:  jwt,
+		Redis:        redisDB,
+	}
 }

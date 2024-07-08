@@ -1,22 +1,17 @@
 package routes
 
 import (
-	"net/http"
-
+	"godgifu/config"
 	"godgifu/modules/account/handlers"
 
-	"github.com/labstack/echo/v4"
+	"godgifu/modules/auth"
+	"godgifu/modules/auth/middleware"
 )
 
-func InitRoutes(server *echo.Echo, handlers handlers.AccountHandlers) {
-	// Setup routes
-	// authRoutes := server.Group("/account")
-	// {
-	// 	authRoutes.POST("/signup", handlers.Signup)
-	// }
-
-	server.GET("/test", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
-
+func InitRoutes(server *config.DevConfiguration, accountHandlers handlers.AccountHandlers, auth auth.Auth) {
+	accountRoutes := server.Echo.Group("/account")
+	{
+		accountRoutes.GET("/", accountHandlers.GetAccount, middleware.AuthAccount(auth.JWTServices))
+		accountRoutes.DELETE("/", accountHandlers.DeleteAccount, middleware.AuthAccount(auth.JWTServices))
+	}
 }

@@ -28,13 +28,18 @@ type JWTFields struct {
 	RefreshTokenExpirationSecs int64
 }
 
-// Configuration struct fields are used for configuring the server
-type DevConfiguration struct {
-	Router          *echo.Echo
+type Router struct {
+	API             string
 	BaseURL         string
+	Enviroment      string
 	Port            string
 	TimeoutDuration time.Duration
-	//Enviroment string
+}
+
+// Configuration struct fields are used for configuring the server
+type DevConfiguration struct {
+	Echo     *echo.Echo
+	Router   *Router
 	Postgres *sqlx.DB
 	// NoSQL
 	Redis *redis.Client
@@ -76,7 +81,7 @@ func DevLoadConfig() (*DevConfiguration, error) {
 	}
 	// ----- End RSA Keys -----
 
-	// ----- Begin JWT tokens
+	// ----- Begin JWT values
 	id_token_exp := os.Getenv("ID_TOKEN_EXP")
 	refresh_token_exp := os.Getenv("REFRESH_TOKEN_EXP")
 	refreshSecretKey := os.Getenv("REFRESH_SECRET_KEY")
@@ -90,7 +95,7 @@ func DevLoadConfig() (*DevConfiguration, error) {
 	}
 	log.Print("idToken expiration time: ", idTokenExpiration)
 	log.Print("refreshToken expiration time: ", refreshTokenExpiration)
-	// ----- End JWT tokens
+	// ----- End JWT values
 
 	// ----- Begin Postgres verify connection -----
 	log.Printf("Config: Connecting to Postgres")
@@ -111,8 +116,8 @@ func DevLoadConfig() (*DevConfiguration, error) {
 	})
 	// ----- End Redis verify connection -----
 
-	router := echo.New()
-	router.Use(middleware.RecoverWithConfig(
+	echoEngine := echo.New()
+	echoEngine.Use(middleware.RecoverWithConfig(
 		middleware.RecoverConfig{
 			Skipper:           middleware.DefaultSkipper,
 			StackSize:         3 << 10,
@@ -122,16 +127,21 @@ func DevLoadConfig() (*DevConfiguration, error) {
 			LogErrorFunc:      middleware.DefaultRecoverConfig.LogErrorFunc,
 		},
 	))
-	router.Use(logger.RequestLogger())
-	router.Use(middleware.CORS())
+	echoEngine.Use(logger.RequestLogger())
+	echoEngine.Use(middleware.CORS())
 
-	router.Validator = &CustomValidator{
+	echoEngine.Validator = &CustomValidator{
 		validator: validator.New(),
 	}
 
 	config := &DevConfiguration{
-		Router:  router,
-		BaseURL: devENV.baseURL,
+		Echo: echoEngine,
+		Router: &Router{
+			BaseURL:         devENV.baseURL,
+			Enviroment:      devENV.enviroment,
+			Port:            devENV.port,
+			TimeoutDuration: 5 * time.Second,
+		},
 		JWT: &JWTFields{
 			PrivateKey:                 privateKey,
 			PublicKey:                  publicKey,
@@ -139,10 +149,10 @@ func DevLoadConfig() (*DevConfiguration, error) {
 			IDTokenExpirationSecs:      idTokenExpiration,
 			RefreshTokenExpirationSecs: refreshTokenExpiration,
 		},
-		Port:            devENV.port,
-		Postgres:        postgres,
-		Redis:           redisDB,
-		TimeoutDuration: 5 * time.Second,
+		// Port:            devENV.port,
+		Postgres: postgres,
+		Redis:    redisDB,
+		// TimeoutDuration: 5 * time.Second,
 	}
 
 	return config, nil

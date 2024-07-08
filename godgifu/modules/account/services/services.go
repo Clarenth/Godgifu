@@ -2,20 +2,39 @@ package services
 
 import (
 	"godgifu/modules/account/db/postgres"
+	"godgifu/modules/account/models"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 type services struct {
-	repository postgres.PostgresDB
+	PG postgres.PostgresDB
 }
 
-func NewAccountServices(repository postgres.PostgresDB) AccountService {
+func NewAccountServices(postgres postgres.PostgresDB) AccountService {
 	return &services{
-		repository: repository,
+		PG: postgres,
 	}
 }
 
-func (services *services) CreateAccount(ctx echo.Context) (err error) {
-	panic("not done")
+func (services *services) GetAccountData(ctx echo.Context, accountID uuid.UUID) (*models.Account, error) {
+	// panic("not done")
+	context := ctx.Request().Context()
+	account, err := services.PG.SelectFullAccountData(context, accountID.String())
+	if err != nil {
+
+	}
+
+	return account, nil
+
+}
+
+func (services *services) DeleteAccountData(ctx echo.Context, accountID uuid.UUID) error {
+	ctxRequest := ctx.Request().Context()
+	err := services.PG.DeleteFullAccountData(ctxRequest, accountID.String())
+	if err != nil {
+		return err
+	}
+	return nil
 }

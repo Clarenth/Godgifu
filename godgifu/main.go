@@ -21,14 +21,12 @@ func main() {
 	if err != nil {
 		log.Printf("LoadConfig failed, error: %v", err)
 	}
+	server.Echo.Debug = true
 
-	server.Router.Debug = true
+	auth := auth.InitAuth(server)
+	account.InitAccount(server, auth)
 
-	// auth.InitAuth(router.Router, router.Postgres, router.Redis, router.JWT.PrivateKey, router.JWT.PublicKey, router.JWT.RefreshSecretKey, router.JWT.RefreshTokenExpirationSecs, router.JWT.IDTokenExpirationSecs)
-	auth.InitAuth(server)
-	account.InitAccount(server.Router, server.Postgres)
-
-	log.Println("Server port:", server.Port)
+	log.Println("Server port:", server.Router.Port)
 	log.Println("Postgres connection:", server.Postgres)
 	log.Println("Redis connection:", server.Redis)
 
@@ -44,7 +42,7 @@ func main() {
 		// if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		// 	log.Fatalf("error with ListenAndServe: %v\n", err)
 		// }
-		if err := server.Router.Start(":" + server.Port); err != http.ErrServerClosed {
+		if err := server.Echo.Start(":" + server.Router.Port); err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
 	}()
@@ -69,7 +67,7 @@ func main() {
 		log.Fatalf("Possible error or Graceful Shutdown initiated. Closing data storage connections %v\n", err)
 	}
 
-	if err := server.Router.Shutdown(ctx); err != nil {
+	if err := server.Echo.Shutdown(ctx); err != nil {
 		log.Fatal("Server forced to shutdown due to: ", err)
 	}
 

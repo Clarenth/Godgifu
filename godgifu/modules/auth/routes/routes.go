@@ -12,10 +12,13 @@ func InitRoutes(server *echo.Echo, authHandlers handlers.AuthHandlers, jwtHandle
 	// Setup routes
 	authRoutes := server.Group("/auth")
 	{
-		authRoutes.POST("/signin", authHandlers.Signin)
-		authRoutes.POST("/signup", authHandlers.Signup)
-		authRoutes.POST("/signout", authHandlers.Signout, middleware.AuthAccount(jwtServices))
+		accountAuth := authRoutes.Group("/account")
+		{
+			accountAuth.POST("/signin", authHandlers.Signin)
+			accountAuth.POST("/signup", authHandlers.Signup)
+			accountAuth.POST("/signout", authHandlers.Signout, middleware.AuthAccount(jwtServices))
 
-		authRoutes.POST("/token", jwtHandlers.RefreshJWT, middleware.AuthAccount(jwtServices))
+			accountAuth.POST("/token", jwtHandlers.RefreshJWT, middleware.AuthAccount(jwtServices))
+		}
 	}
 }
