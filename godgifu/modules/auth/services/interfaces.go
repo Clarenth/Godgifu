@@ -9,7 +9,7 @@ import (
 )
 
 type AuthService interface {
-	CreateAccount(ctx echo.Context, accountData *account.Account) error
+	// CreateAccount(ctx echo.Context, accountData *account.Account) error
 	Signin(ctx echo.Context, accountData *account.AccountEmployee) (result *account.AccountEmployee, err error)
 }
 

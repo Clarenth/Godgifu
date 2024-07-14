@@ -7,7 +7,7 @@ import (
 type AuthHandlers interface {
 	Signin(ctx echo.Context) error
 	Signout(ctx echo.Context) error
-	Signup(ctx echo.Context) error
+	// Signup(ctx echo.Context) error
 }
 
 type JWTHandler interface {

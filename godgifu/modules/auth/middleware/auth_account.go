@@ -55,8 +55,6 @@ func AuthAccount(service services.JWTService) echo.MiddlewareFunc {
 				return err
 			}
 
-			log.Print(header)
-			log.Print(header.IDToken)
 			authHeader := strings.Split(header.IDToken, "Bearer ")
 			log.Print("Hello Auth:Bearer token from middleware success") //authHeader
 			if len(authHeader) < 2 {

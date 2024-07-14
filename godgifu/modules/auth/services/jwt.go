@@ -40,7 +40,7 @@ func generateIDToken(account *account.AccountEmployee, key *rsa.PrivateKey, toke
 	log.Print(tokenLifecycleTime)
 
 	claims := models.JWTToken{
-		ID:    account.ID,
+		ID:    *account.ID,
 		Email: account.Email,
 		// JobTitle:      account.JobTitle,
 		// OfficeAddress: account.OfficeAddress,

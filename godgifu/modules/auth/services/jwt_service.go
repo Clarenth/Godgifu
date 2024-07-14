@@ -69,7 +69,7 @@ func (service *jwtService) NewTokenPairFromAccount(ctx echo.Context, account *ac
 		return nil, echo.ErrInternalServerError
 	}
 
-	refreshToken, err := generateRefreshToken(account.ID, service.RefreshSecretKey, service.RefreshTokenExpirationSecs)
+	refreshToken, err := generateRefreshToken(*account.ID, service.RefreshSecretKey, service.RefreshTokenExpirationSecs)
 	if err != nil {
 		log.Printf("Error generating refreshToken for account: %v. Error: %v\n", account.ID, err.Error())
 		return nil, echo.ErrInternalServerError
@@ -86,7 +86,7 @@ func (service *jwtService) NewTokenPairFromAccount(ctx echo.Context, account *ac
 		JWTIDToken: models.JWTIDToken{SignedString: idToken},
 		JWTRefreshToken: models.JWTRefreshToken{
 			JWT_ID:       refreshToken.ID,
-			AccountID:    account.ID,
+			AccountID:    *account.ID,
 			SignedString: refreshToken.SignedString,
 		},
 	}, nil
@@ -111,7 +111,7 @@ func (service *jwtService) NewIDToken(ctx echo.Context, account *account.Account
 		return nil, echo.ErrInternalServerError
 	}
 
-	refreshToken, err := generateRefreshToken(account.ID, service.RefreshSecretKey, service.RefreshTokenExpirationSecs)
+	refreshToken, err := generateRefreshToken(*account.ID, service.RefreshSecretKey, service.RefreshTokenExpirationSecs)
 	if err != nil {
 		log.Printf("Error generating refreshToken for account: %v. Error: %v\n", account.ID, err.Error())
 		return nil, echo.ErrInternalServerError

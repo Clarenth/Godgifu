@@ -4,8 +4,6 @@ package services
 
 import (
 	"log"
-	"net/http"
-	"time"
 
 	account "godgifu/modules/account/models"
 	postgres "godgifu/modules/auth/db"
@@ -38,33 +36,33 @@ var argon2Params = &argon2id.Params{
 	KeyLength:   64,
 }
 
-func (service *authServices) CreateAccount(ctx echo.Context, account *account.Account) (err error) {
-	// implement argon2 hashing and salting here
-	// to protect passwords from plain text exposing
-	hashedPassword, err := argon2id.CreateHash(account.AccountEmployee.Password, argon2Params)
-	if err != nil {
-		log.Panicf("Unable to encrypt accountData password from new Signup with given email: %v\n", account.AccountEmployee.Email)
-		return ctx.String(http.StatusInternalServerError, "Unable to create user account.")
-	}
-	account.AccountEmployee.Password = hashedPassword
-	account.AccountEmployee.ID = uuid.New()
-	account.AccountEmployee.CreatedAt = time.Now().UTC()
-	account.AccountEmployee.UpdatedAt = time.Now().UTC()
+// func (service *authServices) CreateAccount(ctx echo.Context, account *account.Account) (err error) {
+// 	// implement argon2 hashing and salting here
+// 	// to protect passwords from plain text exposing
+// 	hashedPassword, err := argon2id.CreateHash(account.AccountEmployee.Password, argon2Params)
+// 	if err != nil {
+// 		log.Panicf("Unable to encrypt accountData password from new Signup with given email: %v\n", account.AccountEmployee.Email)
+// 		return ctx.String(http.StatusInternalServerError, "Unable to create user account.")
+// 	}
+// 	account.AccountEmployee.Password = hashedPassword
+// 	account.AccountEmployee.ID = uuid.New()
+// 	account.AccountEmployee.CreatedAt = time.Now().UTC()
+// 	account.AccountEmployee.UpdatedAt = time.Now().UTC()
 
-	account.AccountIdentity.ID = account.AccountEmployee.ID
-	account.AccountIdentity.CreatedAt = account.AccountEmployee.CreatedAt
-	account.AccountIdentity.CreatedAt = account.AccountEmployee.UpdatedAt
+// 	account.AccountIdentity.ID = account.AccountEmployee.ID
+// 	account.AccountIdentity.CreatedAt = account.AccountEmployee.CreatedAt
+// 	account.AccountIdentity.CreatedAt = account.AccountEmployee.UpdatedAt
 
-	err = service.Postgres.CreateAccount(ctx, account)
-	if err != nil {
-		return err
-	}
-	// if err := service.postgres.CreateAccount(ctx, &account); err != nil {
-	// 	log.Print(err)
-	// 	return err
-	// }
-	return nil
-}
+// 	err = service.Postgres.CreateAccount(ctx, account)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// if err := service.postgres.CreateAccount(ctx, &account); err != nil {
+// 	// 	log.Print(err)
+// 	// 	return err
+// 	// }
+// 	return nil
+// }
 
 func (service *authServices) Signin(ctx echo.Context, payload *account.AccountEmployee) (result *account.AccountEmployee, err error) {
 	account, err := service.Postgres.FindAccountByEmail(ctx, payload.Email)

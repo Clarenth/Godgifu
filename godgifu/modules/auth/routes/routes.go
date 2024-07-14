@@ -15,7 +15,7 @@ func InitRoutes(server *echo.Echo, authHandlers handlers.AuthHandlers, jwtHandle
 		accountRoutes := authRoutes.Group("/account")
 		{
 			accountRoutes.POST("/signin", authHandlers.Signin)
-			accountRoutes.POST("/signup", authHandlers.Signup)
+			// accountRoutes.POST("/signup", authHandlers.Signup)
 			accountRoutes.POST("/signout", authHandlers.Signout, middleware.AuthAccount(jwtServices))
 		}
 

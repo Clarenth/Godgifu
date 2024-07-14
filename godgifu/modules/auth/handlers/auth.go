@@ -69,34 +69,34 @@ func (handler *handler) Signout(ctx echo.Context) (err error) {
 	return
 }
 
-func (handler *handler) Signup(ctx echo.Context) error {
-	var request signupSchema
-	if ok := BindJSON(ctx, &request); !ok {
-		log.Printf("Error in Signup, BindJSON failed request: %v", &request)
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
+// func (handler *handler) Signup(ctx echo.Context) error {
+// 	var request signupSchema
+// 	if ok := BindJSON(ctx, &request); !ok {
+// 		log.Printf("Error in Signup, BindJSON failed request: %v", &request)
+// 		return echo.NewHTTPError(http.StatusBadRequest)
+// 	}
 
-	if request.Email == "" || request.Password == "" {
-		log.Printf("Signup request failed with empty string fields: %v, %v", request.Email, request.Password)
-		return ctx.String(http.StatusBadRequest, "Email and Password cannot be empty")
-	}
+// 	if request.Email == "" || request.Password == "" {
+// 		log.Printf("Signup request failed with empty string fields: %v, %v", request.Email, request.Password)
+// 		return ctx.String(http.StatusBadRequest, "Email and Password cannot be empty")
+// 	}
 
-	account := account.Account{
-		AccountEmployee: &account.AccountEmployee{
-			Email:    request.Email,
-			Password: request.Password,
-		},
-		AccountIdentity: &account.AccountIdentity{},
-	}
+// 	account := account.Account{
+// 		AccountEmployee: &account.AccountEmployee{
+// 			Email:    request.Email,
+// 			Password: request.Password,
+// 		},
+// 		AccountIdentity: &account.AccountIdentity{},
+// 	}
 
-	err := handler.AuthService.CreateAccount(ctx, &account)
-	if err != nil {
-		echo.NewHTTPError(http.StatusInternalServerError, "Failed to create user account.")
-		return err
-	}
+// 	err := handler.AuthService.CreateAccount(ctx, &account)
+// 	if err != nil {
+// 		echo.NewHTTPError(http.StatusInternalServerError, "Failed to create user account.")
+// 		return err
+// 	}
 
-	return ctx.String(http.StatusOK, "Success")
-}
+// 	return ctx.String(http.StatusOK, "Success")
+// }
 
 func GetDeviceInfo() {
 

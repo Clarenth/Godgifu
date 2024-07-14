@@ -7,7 +7,7 @@ import (
 )
 
 type PostgresDB interface {
-	// CreateAccount(ctx context.Context, accountData *models.Account) error
-	SelectFullAccountData(ctx context.Context, accountID string) (*models.Account, error)
+	CreateAccount(ctx context.Context, accountData *models.Account) error
+	SelectAccountDataForClientProfile(ctx context.Context, accountID string) (*models.Account, error)
 	DeleteFullAccountData(ctx context.Context, accountID string) error
 }

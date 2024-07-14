@@ -17,6 +17,8 @@ func InitRoutes(server *echo.Echo, apiEndpoint string, accountHandlers handlers.
 		{
 			accountRoutes.GET("/", accountHandlers.GetAccount, middleware.AuthAccount(auth.JWTServices), echoMW.AddTrailingSlash())
 			accountRoutes.DELETE("/", accountHandlers.DeleteAccount, middleware.AuthAdmin(auth.JWTServices))
+
+			accountRoutes.POST("/signup", accountHandlers.CreateAccount)
 		}
 	}
 }

@@ -8,6 +8,7 @@ import (
 )
 
 type AccountService interface {
+	CreateAccount(ctx echo.Context, account *models.Account) error
 	GetAccountData(ctx echo.Context, accountID uuid.UUID) (*models.Account, error)
 	DeleteAccountData(ctx echo.Context, accountID uuid.UUID) error
 }

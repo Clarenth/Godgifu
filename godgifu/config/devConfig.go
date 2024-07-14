@@ -30,6 +30,7 @@ type JWTFields struct {
 
 type Router struct {
 	API             string
+	APIVersion      string
 	BaseURL         string
 	Enviroment      string
 	Port            string
@@ -138,6 +139,7 @@ func DevLoadConfig() (*DevConfiguration, error) {
 		Echo: echoEngine,
 		Router: &Router{
 			API:             devENV.api,
+			APIVersion:      devENV.apiVersion,
 			BaseURL:         devENV.baseURL,
 			Enviroment:      devENV.enviroment,
 			Port:            devENV.port,
@@ -161,6 +163,7 @@ func DevLoadConfig() (*DevConfiguration, error) {
 
 type dev_env struct {
 	api        string
+	apiVersion string
 	baseURL    string
 	port       string
 	enviroment string
@@ -179,6 +182,7 @@ func devLoadENV() (*dev_env, error) {
 	}
 
 	api := os.Getenv("API")
+	apiVersion := os.Getenv("API_VERSION")
 	baseURL := os.Getenv("BASE_URL")
 	port := os.Getenv("PORT")
 	enviroment := os.Getenv("ENVIROMENT")
@@ -198,6 +202,7 @@ func devLoadENV() (*dev_env, error) {
 
 	return &dev_env{
 		api:        api,
+		apiVersion: apiVersion,
 		baseURL:    baseURL,
 		port:       port,
 		enviroment: enviroment,
