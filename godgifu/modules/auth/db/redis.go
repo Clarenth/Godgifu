@@ -20,13 +20,13 @@ func NewRedisTokenRepository(redisClient *redis.Client) RedisDB {
 	}
 }
 
-func (redisRepo *redisTokenRepository) SetRefreshToken(ctx context.Context, accountIDCode string, tokenID string, tokenExpireTime time.Duration) error {
-	// We store the account IDCode with the token id so we can scan
+func (redisRepo *redisTokenRepository) SetRefreshToken(ctx context.Context, accountID string, tokenID string, tokenExpireTime time.Duration) error {
+	// We store the account ID with the token ID so we can scan
 	// over the account's tokens without blocking and delete them
 	// inc case of token leakage
-	key := fmt.Sprintf("%s:%s", accountIDCode, tokenID)
+	key := fmt.Sprintf("%s:%s", accountID, tokenID)
 	if err := redisRepo.Redis.Set(ctx, key, 0, tokenExpireTime).Err(); err != nil {
-		log.Printf("Could not SET the Redis refresh token for account:%s with token ID:%s\n", accountIDCode, tokenID)
+		log.Printf("Could not SET the Redis refresh token for account:%s with token ID:%s\n", accountID, tokenID)
 		return echo.ErrInternalServerError
 	}
 	return nil

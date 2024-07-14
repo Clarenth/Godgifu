@@ -15,6 +15,7 @@ type AuthService interface {
 
 type JWTService interface {
 	NewTokenPairFromAccount(ctx echo.Context, account *account.AccountEmployee, previousTokenID string) (*models.JWTTokenPair, error)
+	NewIDToken(ctx echo.Context, account *account.AccountEmployee, previousTokenID string) (*models.JWTIDToken, error)
 	ValidateIDToken(tokenString string) (*models.JWTToken, error)
 	ValidateRefreshToken(tokenString string) (*models.JWTRefreshToken, error)
 	Signout(ctx echo.Context, accountID uuid.UUID) error

@@ -11,7 +11,7 @@ type AuthHandlers interface {
 }
 
 type JWTHandler interface {
-	RefreshJWT(ctx echo.Context) error
+	NewTokens(ctx echo.Context) error
 }
 
 type PASETOHandler interface {

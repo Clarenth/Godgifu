@@ -46,14 +46,18 @@ func (handler *handler) Signin(ctx echo.Context) error {
 		return err
 	}
 
-	token, err := handler.JWTService.NewTokenPairFromAccount(ctx, accountData, "")
-	log.Print(token)
+	tokens, err := handler.JWTService.NewTokenPairFromAccount(ctx, accountData, "")
+	log.Print(tokens)
 	if err != nil {
 		log.Print(err)
 		return echo.NewHTTPError(http.StatusInternalServerError, "Signin failed.")
 	}
 
-	return ctx.JSON(http.StatusOK, token)
+	refreshTokenCookie := new(http.Cookie)
+	refreshTokenCookie.Name = "Refresh-Token"
+	refreshTokenCookie.Value = tokens.JWTRefreshToken.SignedString
+	ctx.SetCookie(refreshTokenCookie)
+	return ctx.JSON(http.StatusOK, tokens.JWTIDToken)
 }
 
 func (handler *handler) Signout(ctx echo.Context) (err error) {

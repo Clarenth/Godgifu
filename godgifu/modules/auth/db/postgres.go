@@ -33,10 +33,10 @@ func (pg *postgres) CreateAccount(ctx echo.Context, accountData *models.Account)
 		return err
 	}
 
-	query = `INSERT INTO accounts_identity (first_name, last_name, created_at, updated_at)
-						VALUES ($1, $2, $3, $4) RETURNING *;
+	query = `INSERT INTO accounts_identity (id, first_name, last_name, created_at, updated_at)
+						VALUES ($1, $2, $3, $4, $5) RETURNING *;
 						`
-	if result, err := pg.DB.Exec(query, accountData.AccountIdentity.FirstName, accountData.AccountIdentity.LastName, accountData.AccountEmployee.CreatedAt, accountData.AccountEmployee.UpdatedAt); err != nil {
+	if result, err := pg.DB.Exec(query, accountData.AccountIdentity.ID, accountData.AccountIdentity.FirstName, accountData.AccountIdentity.LastName, accountData.AccountEmployee.CreatedAt, accountData.AccountEmployee.UpdatedAt); err != nil {
 		log.Printf("error in Postgres accounts_identity, err: %v", err)
 		log.Printf("Inserted %v", result)
 		return err

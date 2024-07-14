@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS accounts_identity
   gender text,
   height text,
   home_address text,
-  brithdate timestamp,
-  brithplace text,
+  birthdate timestamp,
+  birthplace text,
   created_at timestamp with time zone NOT NULL,
   updated_at timestamp with time zone NOT NULL
 );

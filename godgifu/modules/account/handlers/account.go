@@ -3,6 +3,7 @@ package handlers
 import (
 	"godgifu/modules/account/models"
 	"godgifu/modules/account/services"
+	jwt "godgifu/modules/auth/models"
 
 	"github.com/labstack/echo/v4"
 )
@@ -18,10 +19,10 @@ func NewAccountHandlers(service services.AccountService) AccountHandlers {
 }
 
 func (handler *handler) GetAccount(ctx echo.Context) error {
-	// panic("not done")
 	accountID := ctx.Get("account")
 
-	account, err := handler.AccountService.GetAccountData(ctx, accountID.(*models.AccountEmployee).ID)
+	// account, err := handler.AccountService.GetAccountData(ctx, accountID.(jwt.JWTToken).ID)
+	account, err := handler.AccountService.GetAccountData(ctx, accountID.(*jwt.JWTToken).ID)
 	if err != nil {
 		return echo.NewHTTPError(400, "Debug: An error with your ID code")
 	}

@@ -24,7 +24,7 @@ func main() {
 	server.Echo.Debug = true
 
 	auth := auth.InitAuth(server)
-	account.InitAccount(server, auth)
+	account.InitAccount(server, &auth)
 
 	log.Println("Server port:", server.Router.Port)
 	log.Println("Postgres connection:", server.Postgres)

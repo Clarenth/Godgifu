@@ -137,6 +137,7 @@ func DevLoadConfig() (*DevConfiguration, error) {
 	config := &DevConfiguration{
 		Echo: echoEngine,
 		Router: &Router{
+			API:             devENV.api,
 			BaseURL:         devENV.baseURL,
 			Enviroment:      devENV.enviroment,
 			Port:            devENV.port,
@@ -159,6 +160,7 @@ func DevLoadConfig() (*DevConfiguration, error) {
 }
 
 type dev_env struct {
+	api        string
 	baseURL    string
 	port       string
 	enviroment string
@@ -176,6 +178,7 @@ func devLoadENV() (*dev_env, error) {
 		log.Fatal("Error loading env file: ", envLoadError)
 	}
 
+	api := os.Getenv("API")
 	baseURL := os.Getenv("BASE_URL")
 	port := os.Getenv("PORT")
 	enviroment := os.Getenv("ENVIROMENT")
@@ -194,6 +197,7 @@ func devLoadENV() (*dev_env, error) {
 	redis_port := os.Getenv("REDIS_PORT")
 
 	return &dev_env{
+		api:        api,
 		baseURL:    baseURL,
 		port:       port,
 		enviroment: enviroment,

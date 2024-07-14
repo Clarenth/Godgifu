@@ -23,7 +23,7 @@ func (services *services) GetAccountData(ctx echo.Context, accountID uuid.UUID) 
 	context := ctx.Request().Context()
 	account, err := services.PG.SelectFullAccountData(context, accountID.String())
 	if err != nil {
-
+		return nil, err
 	}
 
 	return account, nil

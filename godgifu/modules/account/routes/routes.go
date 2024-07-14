@@ -1,17 +1,22 @@
 package routes
 
 import (
-	"godgifu/config"
 	"godgifu/modules/account/handlers"
 
 	"godgifu/modules/auth"
 	"godgifu/modules/auth/middleware"
+
+	"github.com/labstack/echo/v4"
+	echoMW "github.com/labstack/echo/v4/middleware"
 )
 
-func InitRoutes(server *config.DevConfiguration, accountHandlers handlers.AccountHandlers, auth auth.Auth) {
-	accountRoutes := server.Echo.Group("/account")
+func InitRoutes(server *echo.Echo, apiEndpoint string, accountHandlers handlers.AccountHandlers, auth auth.Auth) {
+	apiRoutes := server.Group(apiEndpoint)
 	{
-		accountRoutes.GET("/", accountHandlers.GetAccount, middleware.AuthAccount(auth.JWTServices))
-		accountRoutes.DELETE("/", accountHandlers.DeleteAccount, middleware.AuthAccount(auth.JWTServices))
+		accountRoutes := apiRoutes.Group("/account")
+		{
+			accountRoutes.GET("/", accountHandlers.GetAccount, middleware.AuthAccount(auth.JWTServices), echoMW.AddTrailingSlash())
+			accountRoutes.DELETE("/", accountHandlers.DeleteAccount, middleware.AuthAdmin(auth.JWTServices))
+		}
 	}
 }

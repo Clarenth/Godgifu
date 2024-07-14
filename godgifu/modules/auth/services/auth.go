@@ -3,11 +3,12 @@ package services
 // Change the name of this file to auth.go. This is now a file with functions for authentication, and not an all encompassing services file.
 
 import (
-	account "godgifu/modules/account/models"
-	postgres "godgifu/modules/auth/db"
 	"log"
 	"net/http"
 	"time"
+
+	account "godgifu/modules/account/models"
+	postgres "godgifu/modules/auth/db"
 
 	"github.com/alexedwards/argon2id"
 	"github.com/google/uuid"

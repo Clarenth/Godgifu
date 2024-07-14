@@ -16,6 +16,13 @@ func NewJWTHandlers(authServices services.AuthService, jwtServices services.JWTS
 	}
 }
 
-func (handler *jwtHandler) RefreshJWT(ctx echo.Context) error {
+func (handler *jwtHandler) NewTokens(ctx echo.Context) error {
 	panic("Not done yet")
+	// refreshTokenString, err := ctx.Cookie("refreshToken")
+
+	// refreshToken, err := handler.JWTService.ValidateRefreshToken()
+
+	// tokens, err := handler.JWTService.NewTokenPairFromAccount(ctx, account, )
+
+	// return nil
 }

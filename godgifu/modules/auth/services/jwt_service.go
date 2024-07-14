@@ -85,13 +85,46 @@ func (service *jwtService) NewTokenPairFromAccount(ctx echo.Context, account *ac
 	return &models.JWTTokenPair{
 		JWTIDToken: models.JWTIDToken{SignedString: idToken},
 		JWTRefreshToken: models.JWTRefreshToken{
-			// ID:  refreshToken.ID,
-			// UID: account.IDCode,
 			JWT_ID:       refreshToken.ID,
 			AccountID:    account.ID,
 			SignedString: refreshToken.SignedString,
 		},
 	}, nil
+}
+
+func (service *jwtService) NewIDToken(ctx echo.Context, account *account.AccountEmployee, previousTokenID string) (*models.JWTIDToken, error) {
+	log.Print("Hello previousTokenID: ", previousTokenID)
+	log.Print("Hello ID ", account.ID)
+	if previousTokenID != "" {
+		ctxRequest := ctx.Request().Context()
+		if err := service.TokenRepository.DeleteRefreshToken(ctxRequest, account.ID.String(), previousTokenID); err != nil {
+			log.Printf("Could not delete previous refresh token for account ID %v, token ID: %v\n", account.ID, previousTokenID)
+
+			return nil, err
+		}
+	}
+
+	// No need for a repository as idToken is unrelated to any data source
+	idToken, err := generateIDToken(account, service.PrivateKey, service.IDTokenExpirationSecs)
+	if err != nil {
+		log.Printf("Error generating new idToken for account ID Code: %v. Error: %v\n", account.ID, err.Error())
+		return nil, echo.ErrInternalServerError
+	}
+
+	refreshToken, err := generateRefreshToken(account.ID, service.RefreshSecretKey, service.RefreshTokenExpirationSecs)
+	if err != nil {
+		log.Printf("Error generating refreshToken for account: %v. Error: %v\n", account.ID, err.Error())
+		return nil, echo.ErrInternalServerError
+	}
+
+	// On account signup or signin, generate a new token for the session
+	ctxRequest := ctx.Request().Context()
+	if err := service.TokenRepository.SetRefreshToken(ctxRequest, account.ID.String(), refreshToken.ID.String(), refreshToken.ExpirationTime); err != nil {
+		log.Printf("Error storing tokenID for account ID: %v. Error: %v\n", account.ID, err.Error())
+		return nil, echo.ErrInternalServerError
+	}
+
+	return &models.JWTIDToken{SignedString: idToken}, nil
 }
 
 func (service *jwtService) ValidateIDToken(tokenString string) (*models.JWTToken, error) {

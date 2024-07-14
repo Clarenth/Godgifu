@@ -31,7 +31,7 @@ func InitAuth(server *config.DevConfiguration) Auth {
 	})
 	authHandlers := handlers.NewAuthHandlers(auth, jwt)
 	jwtHandlers := handlers.NewJWTHandlers(auth, jwt)
-	routes.InitRoutes(server.Router, authHandlers, jwtHandlers, jwt)
+	routes.InitRoutes(server.Echo, authHandlers, jwtHandlers, jwt)
 
 	return Auth{
 		AuthHandlers: authHandlers,
