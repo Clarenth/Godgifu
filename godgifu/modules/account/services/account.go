@@ -66,7 +66,7 @@ func (service *services) CreateAccount(ctx echo.Context, account *models.Account
 func (services *services) GetAccountData(ctx echo.Context, accountID uuid.UUID) (*models.Account, error) {
 	// panic("not done")
 	context := ctx.Request().Context()
-	account, err := services.PG.SelectAccountDataForClientProfile(context, accountID.String())
+	account, err := services.PG.GetFullAccountData(context, accountID.String())
 	if err != nil {
 		return nil, err
 	}
@@ -82,4 +82,28 @@ func (services *services) DeleteAccountData(ctx echo.Context, accountID uuid.UUI
 		return err
 	}
 	return nil
+}
+
+func (services *services) UpdateEmploymeeData(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountEmployee) (*models.AccountEmployee, error) {
+	ctxRequest := ctx.Request().Context()
+	requestID := accountID.String()
+
+	result, err := services.PG.UpdateAccountEmployee(ctxRequest, requestID, updateData)
+	if err != nil {
+		log.Print(result)
+		return nil, err
+	}
+	return nil, err
+}
+
+func (services *services) UpdateIdentityData(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountIdentity) (*models.AccountIdentity, error) {
+	ctxRequest := ctx.Request().Context()
+	requestID := accountID.String()
+
+	result, err := services.PG.UpdateAccountIdentity(ctxRequest, requestID, updateData)
+	if err != nil {
+		log.Print(result)
+		return nil, err
+	}
+	return nil, err
 }

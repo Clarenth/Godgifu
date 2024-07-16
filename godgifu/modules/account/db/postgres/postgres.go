@@ -24,7 +24,7 @@ func NewPostgresDB(db *sqlx.DB) PostgresDB {
 }
 
 func (pg *postgres) CreateAccount(ctx context.Context, accountData *models.Account) error {
-	query := `INSERT INTO accounts_employee (id, email, password, created_at, updated_at) 
+	query := `INSERT INTO accounts_employee (id, email, password, created_at, updated_at)
 						VALUES ($1, $2, $3, $4, $5) RETURNING *;
 						`
 	if _, err := pg.DB.ExecContext(ctx, query, accountData.AccountEmployee.ID, accountData.AccountEmployee.Email, accountData.AccountEmployee.Password, accountData.AccountEmployee.CreatedAt, accountData.AccountEmployee.UpdatedAt); err != nil {
@@ -47,11 +47,11 @@ func (pg *postgres) CreateAccount(ctx context.Context, accountData *models.Accou
 	return nil
 }
 
-func (pg *postgres) SelectAccountDataForClientProfile(ctx context.Context, accountID string) (*models.Account, error) {
+func (pg *postgres) GetFullAccountData(ctx context.Context, accountID string) (*models.Account, error) {
 	accountEmployee := &models.AccountEmployee{}
 	accountIdentity := &models.AccountIdentity{}
 
-	query := `SELECT email, phone_number, employment_title, office_address, employment_date_start, employment_date_end 
+	query := `SELECT email, phone_number, employment_title, office_address, employment_date_start, employment_date_end
 						FROM accounts_employee WHERE id = $1;`
 	// err := pg.DB.QueryRowxContext(ctx, query, accountID).Scan(&accountEmployee)
 
@@ -60,7 +60,7 @@ func (pg *postgres) SelectAccountDataForClientProfile(ctx context.Context, accou
 		return nil, err
 	}
 
-	query = `SELECT first_name, middle_name, last_name, age, sex, gender, height, home_address, birthdate, birthplace 
+	query = `SELECT first_name, middle_name, last_name, age, sex, gender, height, home_address, birthdate, birthplace
 						FROM accounts_identity WHERE id = $1;`
 	if err := pg.DB.GetContext(ctx, accountIdentity, query, accountID); err != nil {
 		log.Printf("Unable to get account with id: %v. Error:%v\n", accountID, err)
@@ -112,4 +112,11 @@ func (pg *postgres) DeleteFullAccountData(ctx context.Context, accountID string)
 		return err
 	}
 	return nil
+}
+
+func (pg *postgres) UpdateAccountEmployee(ctx context.Context, accountID string, updateData *models.AccountEmployee) (*models.AccountEmployee, error) {
+	return nil, nil
+}
+func (pg *postgres) UpdateAccountIdentity(ctx context.Context, accountID string, updateData *models.AccountIdentity) (*models.AccountIdentity, error) {
+	return nil, nil
 }
