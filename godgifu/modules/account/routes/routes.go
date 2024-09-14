@@ -17,12 +17,7 @@ func InitRoutes(server *echo.Echo, apiEndpoint string, accountHandlers handlers.
 		{
 			accountRoutes.GET("/", accountHandlers.GetAccount, mw.AuthAccount(auth.JWTServices), echoMW.AddTrailingSlash())
 			accountRoutes.DELETE("/", accountHandlers.DeleteAccount, mw.AuthAccount(auth.JWTServices), echoMW.AddTrailingSlash() /*mw.AuthAdmin(auth.JWTServices)*/)
-			// accountRoutes.PATCH("/", accountHandlers.EditAccount, mw.AuthAccount(auth.JWTServices), echoMW.AddTrailingSlash())
-			editRoutes := accountRoutes.Group("/edit")
-			{
-				editRoutes.PATCH("/employee", accountHandlers.UpdateEmployee, mw.AuthAdmin(auth.JWTServices))
-				editRoutes.PATCH("/identity", accountHandlers.UpdateIdentity, mw.AuthAccount(auth.JWTServices))
-			}
+			accountRoutes.PATCH("/", accountHandlers.UpdateAccount, mw.AuthAccount(auth.JWTServices), echoMW.AddTrailingSlash())
 
 			accountRoutes.POST("/signup", accountHandlers.CreateAccount)
 		}

@@ -1,12 +1,15 @@
 package handlers
 
 import (
+	"bytes"
+	"io/ioutil"
 	"log"
 	"net/http"
 
 	"godgifu/modules/account/models"
 	"godgifu/modules/account/services"
 	jwt "godgifu/modules/auth/models"
+
 	"godgifu/modules/tools"
 
 	"github.com/labstack/echo/v4"
@@ -24,6 +27,7 @@ func NewAccountHandlers(service services.AccountService) AccountHandlers {
 
 func (handler *handler) CreateAccount(ctx echo.Context) error {
 	var request signupSchema
+
 	if ok := tools.BindJSON(ctx, &request); !ok {
 		log.Printf("Error in Signup, BindJSON failed request: %v", &request)
 		return echo.NewHTTPError(http.StatusBadRequest)
@@ -52,6 +56,11 @@ func (handler *handler) CreateAccount(ctx echo.Context) error {
 }
 
 func (handler *handler) GetAccount(ctx echo.Context) error {
+
+	/*
+		BindJSON is broken. Must fix to solve the comparison problem.
+	*/
+
 	accountID := ctx.Get("account")
 
 	account, err := handler.AccountService.GetAccountData(ctx, accountID.(*jwt.JWTToken).ID)
@@ -99,17 +108,113 @@ func (handler *handler) DeleteAccount(ctx echo.Context) error {
 	return ctx.NoContent(204)
 }
 
+func (handler *handler) UpdateAccount(ctx echo.Context) error {
+	accountID := ctx.Get("account")
+	log.Print(accountID)
+
+	// we store the Request body inside var body so that it can be used on more functions
+	// this is because each time we read the request body, the body is exhaust. Must investigate why later.
+	body, err := ioutil.ReadAll(ctx.Request().Body)
+	if err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+	}
+
+	// Reset the body after reading into var body
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+	var reqEmp updateEmployee
+	var reqId updateIdentity
+	log.Print(ctx)
+	if tools.BindJSON(ctx, &reqEmp) {
+		log.Print(reqEmp)
+		// accountID = accountID.(*jwt.JWTToken).ID
+		updateData := &models.AccountEmployee{
+			// ID:                  accountID.(*uuid.UUID),
+			Email:               reqEmp.Email,
+			Password:            reqEmp.Password,
+			PhoneNumber:         reqEmp.PhoneNumber,
+			EmploymentTitle:     reqEmp.EmploymentTitle,
+			OfficeAddress:       reqEmp.OfficeAddress,
+			SecurityAccessLevel: reqEmp.SecurityAccessLevel,
+		}
+		log.Print(updateData)
+		return ctx.JSON(200, "Made it to reqEmp with struct data populated.")
+	}
+	log.Print(ctx)
+
+	ctx.Request().Body = ioutil.NopCloser(bytes.NewBuffer(body))
+
+	if tools.BindJSON(ctx, &reqId) {
+		log.Print(reqId)
+		updateData := &models.AccountIdentity{
+			// ID:          accountID.(*uuid.UUID),
+			FirstName:   reqId.FirstName,
+			MiddleName:  reqId.MiddleName,
+			LastName:    reqId.LastName,
+			Sex:         reqId.Sex,
+			Gender:      reqId.Gender,
+			Height:      reqId.Height,
+			HomeAddress: reqId.HomeAddress,
+			Birthdate:   reqId.Birthdate,
+			Birthplace:  reqId.Birthplace,
+		}
+		log.Print(updateData)
+		return ctx.JSON(200, "Made it to reqId with struct data populated.")
+	}
+
+	return ctx.JSON(200, "Outer scope return")
+}
+
 func (handler *handler) UpdateEmployee(ctx echo.Context) error {
 	accountID := ctx.Get("account")
 	// accountID := uuid.MustParse(string(authHeader.IDCode.String()))
 
-	var request models.AccountEmployee
+	// var request models.AccountEmployee
+	// var v interface{}
+	// var request UpdateEmployee
+	// var request1 UpdateIdentity
 
-	if ok := tools.BindJSON(ctx, &request); !ok {
-		log.Printf("Error in Signup, BindJSON failed request: %v", &request)
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
+	// switch ctx. {
+	// case UpdateEmployee:
+	// 	log.Print("Hello case UpdateEmployee")
+	// 	return ctx.JSON(200, "UpdateEmployee")
+	// case UpdateIdentity:
+	// 	log.Print("Hello case UpdateIdentity")
+	// 	return ctx.JSON(200, "UpdateEmployee")
+	// }
 
+	// if ok := tools.BindJSON(ctx, &request); !ok {
+	// 	log.Printf("Error in Signup, BindJSON failed request: %v", &request)
+	// 	return echo.NewHTTPError(http.StatusBadRequest)
+	// }
+
+	// if reflect.DeepEqual(struct1, struct2) {
+	// 	fmt.Println("The JSON data matches one of the structs.")
+	// } else {
+	// 	fmt.Println("The JSON data does not match either struct.")
+	// }
+
+	// if tools.BindJSON(ctx, &request) {
+	// 	log.Print("reached bindJSON employee")
+	// 	// return ctx.JSON(200, "This is a en edit employee")
+	// } else if tools.BindJSON(ctx, &request1) {
+	// 	log.Print("reached bindJSON identity")
+	// 	return ctx.JSON(200, "This is a en edit identity")
+	// } else {
+	// 	return ctx.JSON(200, "We successfully passed the checks.")
+	// }
+
+	// switch {
+	// case tools.BindJSON(ctx, &request1):
+	// 	log.Print("test1")
+	// 	// return ctx.JSON(200, "test1")
+	// case tools.BindJSON(ctx, &request2):
+	// 	log.Print("test2")
+	// 	return ctx.JSON(200, "test2")
+	// default:
+	// 	log.Print("default")
+	// 	return ctx.JSON(200, "default")
+	// }
 	updateData := models.AccountEmployee{}
 
 	result, err := handler.AccountService.UpdateEmploymeeData(ctx, accountID.(*jwt.JWTToken).ID, &updateData)

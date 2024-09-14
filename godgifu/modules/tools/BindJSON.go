@@ -53,7 +53,7 @@ func BindJSON(ctx echo.Context, req interface{}) bool {
 
 		// if we aren't able to properly extract validation errors,
 		// we'll fallback and return an internal server error
-		ctx.JSON(http.StatusInternalServerError, "test2")
+		// ctx.JSON(http.StatusInternalServerError, "sheeeeet")
 		return false
 	}
 	if err := ctx.Validate(req); err != nil {
