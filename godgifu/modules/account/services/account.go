@@ -63,7 +63,7 @@ func (service *services) CreateAccount(ctx echo.Context, account *models.Account
 	return nil
 }
 
-func (services *services) GetAccountData(ctx echo.Context, accountID uuid.UUID) (*models.Account, error) {
+func (services *services) GetAccount(ctx echo.Context, accountID uuid.UUID) (*models.Account, error) {
 	// panic("not done")
 	context := ctx.Request().Context()
 	account, err := services.PG.GetFullAccountData(context, accountID.String())
@@ -75,7 +75,7 @@ func (services *services) GetAccountData(ctx echo.Context, accountID uuid.UUID) 
 
 }
 
-func (services *services) DeleteAccountData(ctx echo.Context, accountID uuid.UUID) error {
+func (services *services) DeleteAccount(ctx echo.Context, accountID uuid.UUID) error {
 	ctxRequest := ctx.Request().Context()
 	err := services.PG.DeleteFullAccountData(ctxRequest, accountID.String())
 	if err != nil {
@@ -84,23 +84,21 @@ func (services *services) DeleteAccountData(ctx echo.Context, accountID uuid.UUI
 	return nil
 }
 
-func (services *services) UpdateEmploymeeData(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountEmployee) (*models.AccountEmployee, error) {
+func (services *services) UpdateEmployee(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountEmployee) (*models.AccountEmployee, error) {
 	ctxRequest := ctx.Request().Context()
-	requestID := accountID.String()
 
-	result, err := services.PG.UpdateAccountEmployee(ctxRequest, requestID, updateData)
+	result, err := services.PG.UpdateEmployeeAccount(ctxRequest, accountID.String(), updateData)
 	if err != nil {
-		log.Print(result)
+		log.Print("services error: ", result)
 		return nil, err
 	}
 	return nil, err
 }
 
-func (services *services) UpdateIdentityData(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountIdentity) (*models.AccountIdentity, error) {
+func (services *services) UpdateIdentity(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountIdentity) (*models.AccountIdentity, error) {
 	ctxRequest := ctx.Request().Context()
-	requestID := accountID.String()
 
-	result, err := services.PG.UpdateAccountIdentity(ctxRequest, requestID, updateData)
+	result, err := services.PG.UpdateIdentityAccount(ctxRequest, accountID.String(), updateData)
 	if err != nil {
 		log.Print(result)
 		return nil, err

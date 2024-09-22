@@ -13,6 +13,6 @@ type PostgresDB interface {
 
 	DeleteFullAccountData(ctx context.Context, accountID string) error
 
-	UpdateAccountEmployee(ctx context.Context, accountID string, updateData *models.AccountEmployee) (*models.AccountEmployee, error)
-	UpdateAccountIdentity(ctx context.Context, accountID string, updateData *models.AccountIdentity) (*models.AccountIdentity, error)
+	UpdateEmployeeAccount(ctx context.Context, accountID string, updateData *models.AccountEmployee) (*models.AccountEmployee, error)
+	UpdateIdentityAccount(ctx context.Context, accountID string, updateData *models.AccountIdentity) (*models.AccountIdentity, error)
 }

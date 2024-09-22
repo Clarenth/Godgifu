@@ -118,6 +118,8 @@ func DevLoadConfig() (*DevConfiguration, error) {
 	// ----- End Redis verify connection -----
 
 	echoEngine := echo.New()
+	echoEngine.HideBanner = true
+	// echoEngine.HidePort = true
 	echoEngine.Use(middleware.RecoverWithConfig(
 		middleware.RecoverConfig{
 			Skipper:           middleware.DefaultSkipper,

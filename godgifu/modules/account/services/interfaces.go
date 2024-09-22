@@ -9,8 +9,8 @@ import (
 
 type AccountService interface {
 	CreateAccount(ctx echo.Context, account *models.Account) error
-	GetAccountData(ctx echo.Context, accountID uuid.UUID) (*models.Account, error)
-	DeleteAccountData(ctx echo.Context, accountID uuid.UUID) error
-	UpdateEmploymeeData(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountEmployee) (*models.AccountEmployee, error)
-	UpdateIdentityData(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountIdentity) (*models.AccountIdentity, error)
+	GetAccount(ctx echo.Context, accountID uuid.UUID) (*models.Account, error)
+	DeleteAccount(ctx echo.Context, accountID uuid.UUID) error
+	UpdateEmployee(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountEmployee) (*models.AccountEmployee, error)
+	UpdateIdentity(ctx echo.Context, accountID uuid.UUID, updateData *models.AccountIdentity) (*models.AccountIdentity, error)
 }

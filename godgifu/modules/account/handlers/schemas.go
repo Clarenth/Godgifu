@@ -5,29 +5,6 @@ type signupSchema struct {
 	Password string `json:"password" validate:"required,gte=16,lte=512"`
 }
 
-// type updateEmployee struct {
-// 	Email               string     `json:"email,omitempty"`
-// 	Password            string     `json:"password,omitempty"`
-// 	PhoneNumber         *string    `json:"phone_number,omitempty"`
-// 	EmploymentTitle     *string    `json:"employment_title,omitempty"`
-// 	OfficeAddress       *string    `json:"office_address,omitempty"`
-// 	SecurityAccessLevel *string    `json:"security_access_level,omitempty"`
-// 	EmploymentDateStart *time.Time `json:"employment_date_start,omitempty"`
-// 	EmploymentDateEnd   *time.Time `json:"employment_date_end,omitempty"`
-// }
-// type updateIdentity struct {
-// 	FirstName   *string `json:"first_name,omitempty"`
-// 	MiddleName  *string `json:"middle_name,omitempty"`
-// 	LastName    *string `json:"last_name,omitempty"`
-// 	Age         *string `json:"age,omitempty"`
-// 	Sex         *string `json:"sex,omitempty"`
-// 	Gender      *string `json:"gender,omitempty"`
-// 	Height      *string `json:"height,omitempty"`
-// 	HomeAddress *string `json:"home_address,omitempty"`
-// 	Birthdate   *string `json:"birthdate,omitempty"`
-// 	Birthplace  *string `json:"birthplace,omitempty"`
-// }
-
 type updateEmployee struct {
 	Email               string  `json:"email,omitempty" validate:"required,email"`
 	Password            string  `json:"password"`
